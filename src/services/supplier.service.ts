@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
 
-export async function getSupplierDashboard(
+export async function getSupplierLPG Connect
+Operations Center(
 organizationId:string
 ){
 

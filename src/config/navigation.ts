@@ -1,147 +1,59 @@
-import { Icons } from "./icons";
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Package,
+  Users,
+  Building2,
+  Truck,
+  CreditCard,
+  BarChart3,
+  Settings,
+} from "lucide-react";
 
-// export const supplierNavigation = [
-//   {
-//     title: "Dashboard",
-//     href: "/supplier/dashboard",
-//     icon: Icons.Home,
-//   },
-//   {
-//     title: "Orders",
-//     href: "/supplier/orders",
-//     icon: Icons.ShoppingCart,
-//   },
-//   {
-//     title: "Inventory",
-//     href: "/supplier/inventory",
-//     icon: Icons.Package,
-//   },
-//   {
-//     title: "Customers",
-//     href: "/supplier/customers",
-//     icon: Icons.Users,
-//   },
-//   {
-//     title: "Deliveries",
-//     href: "/supplier/deliveries",
-//     icon: Icons.Truck,
-//   },
-//   {
-//     title: "Analytics",
-//     href: "/supplier/analytics",
-//     icon: Icons.BarChart3,
-//   },
-//   {
-//     title: "Wallet",
-//     href: "/supplier/wallet",
-//     icon: Icons.Wallet,
-//   },
-//   {
-//     title: "Messages",
-//     href: "/supplier/messages",
-//     icon: Icons.MessageSquare,
-//   },
-//   {
-//     title: "Settings",
-//     href: "/supplier/settings",
-//     icon: Icons.Settings,
-//   },
-// ];
-
-
-export const consumerNavigation = [
+export const dashboardNavigation = [
   {
     title: "Dashboard",
-    href: "/customer/dashboard",
-    icon: Icons.Home,
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Marketplace",
+    href: "/marketplace",
+    icon: ShoppingCart,
   },
   {
     title: "Orders",
-    href: "/customer/orders",
-    icon: Icons.ShoppingCart,
-  },
-  {
-    title: "Inventory",
-    href: "/customer/inventory",
-    icon: Icons.Package,
+    href: "/orders",
+    icon: Package,
   },
   {
     title: "Customers",
-    href: "/customer/customers",
-    icon: Icons.Users,
+    href: "/customers",
+    icon: Users,
+  },
+  {
+    title: "Suppliers",
+    href: "/suppliers",
+    icon: Building2,
   },
   {
     title: "Deliveries",
-    href: "/customer/deliveries",
-    icon: Icons.Truck,
+    href: "/deliveries",
+    icon: Truck,
+  },
+  {
+    title: "Payments",
+    href: "/payments",
+    icon: CreditCard,
   },
   {
     title: "Analytics",
-    href: "/customer/analytics",
-    icon: Icons.BarChart3,
-  },
-  {
-    title: "Wallet",
-    href: "/customer/wallet",
-    icon: Icons.Wallet,
-  },
-  {
-    title: "Messages",
-    href: "/customer/messages",
-    icon: Icons.MessageSquare,
+    href: "/analytics",
+    icon: BarChart3,
   },
   {
     title: "Settings",
-    href: "/customer/settings",
-    icon: Icons.Settings,
-  },
-];
-
-
-export const supplierNavigation = [
-  {
-    title: "Dashboard",
-    href: "/supplier/dashboard",
-    icon: Icons.Home,
-  },
-  {
-    title: "Orders",
-    href: "/supplier/orders",
-    icon: Icons.ShoppingCart,
-  },
-  {
-    title: "Inventory",
-    href: "/supplier/inventory",
-    icon: Icons.Package,
-  },
-  {
-    title: "Customers",
-    href: "/supplier/customers",
-    icon: Icons.Users,
-  },
-  {
-    title: "Deliveries",
-    href: "/supplier/deliveries",
-    icon: Icons.Truck,
-  },
-  {
-    title: "Analytics",
-    href: "/supplier/analytics",
-    icon: Icons.BarChart3,
-  },
-  {
-    title: "Wallet",
-    href: "/supplier/wallet",
-    icon: Icons.Wallet,
-  },
-  {
-    title: "Messages",
-    href: "/supplier/messages",
-    icon: Icons.MessageSquare,
-  },
-  {
-    title: "Settings",
-    href: "/supplier/settings",
-    icon: Icons.Settings,
+    href: "/settings",
+    icon: Settings,
   },
 ];

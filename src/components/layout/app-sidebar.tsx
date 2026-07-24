@@ -17,8 +17,10 @@ Settings
 const navigation = [
 
 {
-name:"Dashboard",
-href:"/supplier/dashboard",
+name:"LPG Connect
+Operations Center",
+href:"/supplier/LPG Connect
+Operations Center",
 icon:Home
 },
 

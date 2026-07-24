@@ -1,13 +1,16 @@
 "use client";
 
-import CustomerDashboard from "@/features/customers/components/customer-dashboard";
+import CustomerLPG Connect
+Operations Center from "@/features/customers/components/customer-LPG Connect
+Operations Center";
 
 
 export default function CustomerPage(){
 
 return (
 
-<CustomerDashboard/>
+<CustomerLPG Connect
+Operations Center/>
 
 );
 

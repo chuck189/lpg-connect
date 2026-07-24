@@ -2,17 +2,15 @@
 
 import { Bell, Search } from "lucide-react";
 
-interface DashboardHeaderProps {
+interface LPGConnectOperationsCenterHeaderProps {
   title?: string;
   subtitle?: string;
 }
 
-
-export default function DashboardHeader({
-  title = "LPG Connect Dashboard",
+export default function LPGConnectOperationsCenterHeader({
+  title = "LPG Connect Operations Center",
   subtitle = "Energy management platform",
-}: DashboardHeaderProps) {
-
+}: LPGConnectOperationsCenterHeaderProps) {
   return (
     <header
       className="
@@ -25,11 +23,9 @@ export default function DashboardHeader({
       px-6
       "
     >
-
       {/* Left Side */}
 
       <div>
-
         <h1 className="font-semibold text-lg">
           {title}
         </h1>
@@ -37,7 +33,6 @@ export default function DashboardHeader({
         <p className="text-xs text-muted-foreground">
           {subtitle}
         </p>
-
       </div>
 
 
@@ -45,7 +40,6 @@ export default function DashboardHeader({
 
       <div className="flex items-center gap-4">
 
-
         <button
           className="
           rounded-full
@@ -53,7 +47,7 @@ export default function DashboardHeader({
           hover:bg-muted
           "
         >
-          <Search size={18}/>
+          <Search size={18} />
         </button>
 
 
@@ -64,12 +58,10 @@ export default function DashboardHeader({
           hover:bg-muted
           "
         >
-          <Bell size={18}/>
+          <Bell size={18} />
         </button>
-
 
       </div>
-
 
     </header>
   );

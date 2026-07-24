@@ -4,7 +4,8 @@
 import { useEffect,useState } from "react";
 
 
-export function useDashboard(){
+export function useLPG Connect
+Operations Center(){
 
 
 const [data,setData]=useState(null);
@@ -15,7 +16,8 @@ useEffect(()=>{
 
 
 fetch(
-"/api/customers/dashboard"
+"/api/customers/LPG Connect
+Operations Center"
 )
 
 .then(res=>res.json())

@@ -4,12 +4,14 @@
 import { useQuery } from "@tanstack/react-query";
 
 
-async function fetchDashboard(){
+async function fetchLPG Connect
+Operations Center(){
 
 
 const response =
 await fetch(
-"/api/customers/dashboard"
+"/api/customers/LPG Connect
+Operations Center"
 );
 
 
@@ -20,17 +22,20 @@ return response.json();
 
 
 
-export function useCustomerDashboard(){
+export function useCustomerLPG Connect
+Operations Center(){
 
 
 return useQuery({
 
 queryKey:[
-"customer-dashboard"
+"customer-LPG Connect
+Operations Center"
 ],
 
 queryFn:
-fetchDashboard
+fetchLPG Connect
+Operations Center
 
 });
 

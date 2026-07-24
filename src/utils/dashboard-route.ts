@@ -1,7 +1,8 @@
 import { UserRole } from "@/generated/prisma";
 
 
-export function dashboardRoute(
+export function LPG Connect
+Operations CenterRoute(
 role:UserRole
 ){
 

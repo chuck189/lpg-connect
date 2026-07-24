@@ -1,6 +1,10 @@
 export interface DashboardStats {
-    revenue: number;
-    totalOrders: number;
-    totalCustomers: number;
-    totalProducts: number;
-  }
+  ordersToday: number;
+  revenueToday: number;
+  activeCustomers: number;
+  activeSuppliers: number;
+  cylindersAvailable: number;
+  deliveriesPending: number;
+  driversOnline: number;
+  lowStockItems: number;
+}
