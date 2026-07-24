@@ -1,0 +1,3220 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+////////////////////////////////////////////////////
+// ENUMS
+////////////////////////////////////////////////////
+
+enum UserRole {
+  CUSTOMER
+  OWNER
+  MANAGER
+  DRIVER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+}
+
+enum CustomerType {
+  HOUSEHOLD
+  BUSINESS
+  RESTAURANT
+  HOTEL
+  INDUSTRIAL
+}
+
+////////////////////////////////////////////////////
+// USER AUTHENTICATION
+////////////////////////////////////////////////////
+
+model User {
+  id String @id @default(uuid())
+
+  firstName String
+
+  lastName String
+
+  email String @unique
+
+  phone String @unique
+
+  password String
+
+  role UserRole @default(CUSTOMER)
+
+  status AccountStatus @default(ACTIVE)
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  customer Customer?
+
+  driver Driver?
+
+  roleId String?
+
+  roleAssignment Role? @relation(fields: [roleId], references: [id])
+
+  refreshTokens RefreshToken[]
+
+  payments Payment[]
+
+  sentMessages Message[] @relation("MessageSender")
+
+  stockMovements StockMovement[]
+
+  supplierApprovalsSubmitted SupplierApproval[] @relation("SupplierApprovalSubmitted")
+
+  supplierApprovalsReviewed SupplierApproval[] @relation("SupplierApprovalReviewed")
+
+  adminActions AdminActionLog[]
+
+  conversationParticipants ConversationParticipant[]
+
+  notifications Notification[]
+
+  notificationPreference NotificationPreference?
+
+  createdAt DateTime @default(now())
+
+  updatedAt         DateTime           @updatedAt
+  smsLogs           SmsLog[]
+  emailLogs         EmailLog[]
+  pushNotifications PushNotification[]
+  otpCodes          OtpCode[]
+  auditLogs         AuditLog[]
+  activityLogs      ActivityLog[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([organizationId])
+  @@index([role])
+  @@index([status])
+}
+
+model RefreshToken {
+  id String @id @default(uuid())
+
+  token String @unique
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// ORGANIZATION / LPG SUPPLIERS
+////////////////////////////////////////////////////
+
+model Organization {
+  id String @id @default(uuid())
+
+  name String
+
+  registrationNumber String?
+
+  email String?
+
+  phone String?
+
+  analytics SupplierAnalytics?
+
+  status AccountStatus @default(ACTIVE)
+
+  announcements Announcement[]
+
+  conversations Conversation[]
+
+  geoLocations ModelGeo[]
+
+  supplierProfile SupplierProfile?
+
+  supplierApprovals SupplierApproval[]
+
+  users User[]
+
+  reviews Review[]
+
+  reputation SupplierReputation?
+
+  complaints Complaint[]
+
+  trustEvents TrustEvent[]
+
+  responseMetrics SupplierResponseMetric[]
+
+  orders Order[]
+
+  aiPredictions AIPrediction[]
+
+  aiInsights AIInsight[]
+
+  supplierPerformance SupplierPerformanceScore?
+
+  demandForecasts DemandForecast[]
+
+  decisionLogs DecisionLog[]
+
+  cylinders Cylinder[]
+
+  promotions Promotion[]
+
+  advertisements Advertisement[]
+
+  cylinderMovements CylinderMovement[]
+
+  branches Branch[]
+
+  financialLedger FinancialLedger[]
+
+  settlements SupplierSettlement[]
+
+  supplierVerification SupplierVerification?
+
+  supplierDocuments SupplierDocument[]
+
+  supplierProducts SupplierProduct[]
+
+  analyticsSnapshots AnalyticsSnapshot[]
+
+  deliveryAnalytics DeliveryAnalytics[]
+
+  revenueRecords RevenueRecord[]
+
+  products Inventory[]
+
+  warehouses Warehouse[]
+
+  supplierPrices SupplierPrice[]
+
+  platformRevenue PlatformRevenue[]
+
+  drivers Driver[]
+
+  vehicles Vehicle[]
+
+  deliveries Delivery[]
+
+  customers Customer[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt            DateTime              @updatedAt
+  purchaseLedgers      PurchaseLedger[]
+  supplierPerformances SupplierPerformance[]
+  organizationSettings OrganizationSetting[]
+  apiKeys              ApiKey[]
+  webhooks             Webhook[]
+  integrations         Integration[]
+
+  @@index([name])
+  @@index([status])
+  @@index([registrationNumber])
+}
+
+model Branch {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  name String
+
+  address String
+
+  phone String?
+
+  inventories Inventory[]
+
+  geoLocations ModelGeo[]
+
+  createdAt  DateTime    @default(now())
+  warehouses Warehouse[]
+
+  @@index([organizationId])
+  @@index([name])
+}
+
+////////////////////////////////////////////////////
+// SUPPLIER VERIFICATION
+////////////////////////////////////////////////////
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model SupplierVerification {
+  id String @id @default(uuid())
+
+  organizationId String @unique
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  status VerificationStatus @default(PENDING)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+}
+
+model SupplierDocument {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  documentType String
+
+  documentUrl String
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// CUSTOMERS
+////////////////////////////////////////////////////
+
+model Customer {
+  id String @id @default(uuid())
+
+  userId String @unique
+
+  user User @relation(fields: [userId], references: [id])
+
+  type CustomerType @default(HOUSEHOLD)
+
+  addresses CustomerAddress[]
+
+  orders Order[]
+
+  conversations Conversation[]
+
+  geoLocations ModelGeo[]
+
+  payments PaymentTransaction[]
+
+  wallet CustomerWallet?
+
+  cart Cart?
+
+  complaints Complaint[]
+
+  usageLogs UsageLog[]
+
+  favouriteSuppliers FavouriteSupplier[]
+
+  reviews Review[]
+
+  refillReminders RefillReminder[]
+
+  aiPredictions AIPrediction[]
+
+  behaviourScore CustomerBehaviourScore?
+
+  segments CustomerSegmentAssignment[]
+
+  predictions ConsumptionPrediction[]
+
+  loyaltyTransactions LoyaltyTransaction[]
+
+  marketplaceSearches MarketplaceSearch[]
+
+  recommendations SupplierRecommendation[]
+
+  score CustomerScore?
+
+  loyaltyAccount LoyaltyAccount?
+
+  couponUsages CouponUsage[]
+
+  locations CustomerLocation[]
+
+  searchHistory SearchHistory[]
+
+  preferences CustomerPreference?
+
+  createdAt DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  organizationId String?
+
+  cylinders Cylinder[]
+
+  cylinderMovements CylinderMovement[]
+  supplierReviews   SupplierReview[]
+  checkoutSessions  CheckoutSession[]
+
+  @@index([userId])
+  @@index([type])
+}
+
+model CustomerAddress {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  label String
+
+  address String
+
+  province String
+
+  district String
+
+  latitude Float?
+
+  longitude Float?
+
+  createdAt DateTime @default(now())
+
+  @@index([customerId])
+  @@index([province])
+  @@index([district])
+}
+
+////////////////////////////////////////////////////
+// DRIVER MANAGEMENT
+////////////////////////////////////////////////////
+
+model Driver {
+  id String @id @default(uuid())
+
+  userId String @unique
+
+  organizationId String
+
+  user User @relation(fields: [userId], references: [id])
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  licenseNumber String?
+
+  active Boolean @default(true)
+
+  deliveries Delivery[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// LPG PRODUCT CATALOGUE
+////////////////////////////////////////////////////
+
+enum ProductCategory {
+  LPG
+  CYLINDER
+  ACCESSORY
+}
+
+model Product {
+  id String @id @default(uuid())
+
+  name String
+
+  description String?
+
+  lpgProfile LPGProduct?
+
+  category ProductCategory
+
+  unit String
+
+  supplierProducts SupplierProduct[]
+
+  supplierPrices SupplierPrice[]
+
+  inventories Inventory[]
+
+  promotionProducts PromotionProduct[]
+
+  demandForecasts DemandForecast[]
+
+  supplierLocations SupplierServiceArea[]
+
+  marketplaceProducts SupplierMarketplaceProduct[]
+
+  reviews Review[]
+
+  purchaseItems PurchaseItem[]
+
+  orderItems OrderItem[]
+
+  usageLogs UsageLog[]
+
+  demandAnalytics ProductDemandAnalytics[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  stockMovements StockMovement[]
+  cylinders      Cylinder[]
+  cartItems      CartItem[]
+
+  @@index([category])
+  @@index([name])
+}
+
+////////////////////////////////////////////////////
+// SUPPLIER PRODUCT OFFERINGS
+////////////////////////////////////////////////////
+
+model SupplierProduct {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  productId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  product Product @relation(fields: [productId], references: [id])
+
+  sellingPrice Float
+
+  active Boolean @default(true)
+
+  createdAt DateTime   @default(now())
+  cartItems CartItem[]
+
+  @@unique([organizationId, productId])
+  @@index([organizationId])
+  @@index([productId])
+  @@index([active])
+}
+
+////////////////////////////////////////////////////
+// INVENTORY MANAGEMENT
+////////////////////////////////////////////////////
+
+model Inventory {
+  id String @id @default(uuid())
+
+  warehouseId String
+
+  productId String
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  product Product @relation(fields: [productId], references: [id])
+
+  quantity Float @default(0)
+
+  reservedQuantity Float @default(0)
+
+  availableQuantity Float @default(0)
+
+  minimumStock Float @default(0)
+
+  stockMovements StockMovement[]
+
+  updatedAt DateTime @updatedAt
+
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  branch         Branch?       @relation(fields: [branchId], references: [id])
+  branchId       String?
+
+  @@unique([warehouseId, productId])
+  @@index([branchId])
+  @@index([productId])
+}
+
+////////////////////////////////////////////////////
+// ORDER ENUMS
+////////////////////////////////////////////////////
+
+enum PaymentMethod {
+  CASH
+
+  MOBILE_MONEY
+
+  BANK
+
+  CARD
+}
+
+////////////////////////////////////////////////////
+// ORDER MANAGEMENT
+////////////////////////////////////////////////////
+
+model Order {
+  id String @id @default(uuid())
+
+  orderNumber String @unique
+
+  organizationId String
+
+  customerId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  status OrderStatus @default(PENDING)
+
+  paymentStatus PaymentStatus @default(PENDING)
+
+  paymentMethod PaymentMethod?
+
+  subtotal Float
+
+  deliveryFee Float @default(0)
+
+  totalAmount Float
+
+  notes String?
+
+  orderItems OrderItem[]
+
+  couponUsages CouponUsage[]
+
+  reviews Review[]
+
+  complaints Complaint[]
+
+  checkoutSession CheckoutSession? @relation(fields: [checkoutSessionId], references: [id])
+
+  payments PaymentTransaction[]
+
+  delivery Delivery?
+
+  createdAt DateTime @default(now())
+
+  updatedAt         DateTime         @updatedAt
+  payment           Payment?
+  usageLogs         UsageLog[]
+  supplierReviews   SupplierReview[]
+  checkoutSessionId String?
+
+  @@index([organizationId])
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id String @id @default(uuid())
+
+  orderId String
+
+  productId String
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  product Product @relation(fields: [productId], references: [id])
+
+  quantity Float
+
+  unitPrice Float
+
+  totalPrice Float
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+////////////////////////////////////////////////////
+// DELIVERY STATUS
+////////////////////////////////////////////////////
+
+enum DeliveryStatus {
+  PENDING
+
+  ASSIGNED
+
+  PICKED_UP
+
+  IN_TRANSIT
+
+  ARRIVED
+
+  DELIVERED
+
+  FAILED
+
+  CANCELLED
+}
+
+model Vehicle {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  registrationNumber String @unique
+
+  model String?
+
+  capacity Float?
+
+  active Boolean @default(true)
+
+  deliveries Delivery[]
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// DELIVERY MANAGEMENT
+////////////////////////////////////////////////////
+
+model Delivery {
+  id String @id @default(uuid())
+
+  orderId String @unique
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  driverId String?
+
+  driver Driver? @relation(fields: [driverId], references: [id])
+
+  vehicleId String?
+
+  riskScore DeliveryRiskScore?
+
+  vehicle Vehicle? @relation(fields: [vehicleId], references: [id])
+
+  status DeliveryStatus @default(PENDING)
+
+  deliveryAddress String
+
+  latitude Float?
+
+  longitude Float?
+
+  scheduledAt DateTime?
+
+  pickedUpAt DateTime?
+
+  deliveredAt DateTime?
+
+  proofOfDeliveryUrl String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  organization   Organization?   @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  deliveryEvents DeliveryEvent[]
+
+  geoLocations ModelGeo[]
+
+  @@index([orderId])
+  @@index([driverId])
+  @@index([vehicleId])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+////////////////////////////////////////////////////
+// CUSTOMER LPG USAGE TRACKING
+////////////////////////////////////////////////////
+
+model UsageLog {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  orderId String?
+
+  order Order? @relation(fields: [orderId], references: [id])
+
+  productId String
+
+  product Product @relation(fields: [productId], references: [id])
+
+  quantity Float
+
+  usageDate DateTime @default(now())
+
+  source String?
+
+  @@index([customerId])
+  @@index([productId])
+  @@index([usageDate])
+}
+
+////////////////////////////////////////////////////
+// CONSUMPTION PREDICTION ENGINE
+////////////////////////////////////////////////////
+
+model ConsumptionPrediction {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  averageConsumption Float
+
+  averageDaysBetweenOrders Float
+
+  predictedNextOrder DateTime
+
+  confidenceScore Float
+
+  generatedAt DateTime @default(now())
+
+  refillReminders RefillReminder[]
+
+  @@index([customerId])
+}
+
+////////////////////////////////////////////////////
+// SUPPLIER ANALYTICS
+////////////////////////////////////////////////////
+
+model SupplierAnalytics {
+  id String @id @default(uuid())
+
+  organizationId String @unique
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  totalOrders Int @default(0)
+
+  completedOrders Int @default(0)
+
+  cancelledOrders Int @default(0)
+
+  averageDeliveryTime Float?
+
+  averageRating Float?
+
+  customerRetention Float?
+
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// CUSTOMER VALUE SCORING
+////////////////////////////////////////////////////
+
+model CustomerScore {
+  id String @id @default(uuid())
+
+  customerId String @unique
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  lifetimeValue Float @default(0)
+
+  totalOrders Int @default(0)
+
+  totalSpent Float @default(0)
+
+  purchaseFrequency Float @default(0)
+
+  loyaltyScore Float @default(0)
+
+  reliabilityScore Float @default(0)
+
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// PURCHASE LEDGER
+////////////////////////////////////////////////////
+
+model PurchaseLedger {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  supplierName String
+
+  invoiceNumber String?
+
+  totalAmount Float
+
+  purchasedAt DateTime @default(now())
+
+  items PurchaseItem[]
+}
+
+model PurchaseItem {
+  id String @id @default(uuid())
+
+  purchaseId String
+
+  productId String
+
+  purchase PurchaseLedger @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+
+  product Product @relation(fields: [productId], references: [id])
+
+  quantity Float
+
+  costPrice Float
+}
+
+////////////////////////////////////////////////////
+// ORDER ENUMS
+////////////////////////////////////////////////////
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  REJECTED
+}
+
+////////////////////////////////////////////////////
+// CART MANAGEMENT
+////////////////////////////////////////////////////
+
+model Cart {
+  id String @id @default(uuid())
+
+  customerId String @unique
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt        DateTime          @updatedAt
+  checkoutSessions CheckoutSession[]
+}
+
+model CartItem {
+  id String @id @default(uuid())
+
+  cartId String
+
+  productId String
+
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  product Product @relation(fields: [productId], references: [id])
+
+  quantity Float
+
+  createdAt DateTime @default(now())
+
+  supplierProduct   SupplierProduct? @relation(fields: [supplierProductId], references: [id])
+  supplierProductId String?
+}
+
+////////////////////////////////////////////////////
+// PLATFORM REVENUE
+////////////////////////////////////////////////////
+
+enum RevenueType {
+  COMMISSION
+
+  SUBSCRIPTION
+
+  ADVERTISEMENT
+}
+
+model PlatformRevenue {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  type RevenueType
+
+  amount Float
+
+  reference String?
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// ROLE BASED ACCESS CONTROL
+////////////////////////////////////////////////////
+
+enum PermissionAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  APPROVE
+  EXPORT
+}
+
+model Role {
+  id String @id @default(uuid())
+
+  name String @unique
+
+  description String?
+
+  users User[]
+
+  permissions RolePermission[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model Permission {
+  id String @id @default(uuid())
+
+  name String @unique
+
+  module String
+
+  action PermissionAction
+
+  description String?
+
+  roles RolePermission[]
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// ROLE PERMISSION MANAGEMENT
+////////////////////////////////////////////////////
+
+model RolePermission {
+  id String @id @default(uuid())
+
+  roleId String
+
+  permissionId String
+
+  role Role @relation(fields: [roleId], references: [id])
+
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+////////////////////////////////////////////////////
+// NOTIFICATIONS & COMMUNICATION
+////////////////////////////////////////////////////
+
+enum NotificationType {
+  ORDER
+
+  DELIVERY
+
+  PAYMENT
+
+  PROMOTION
+
+  SYSTEM
+
+  MESSAGE
+
+  INVENTORY
+}
+
+enum NotificationChannel {
+  IN_APP
+
+  EMAIL
+
+  SMS
+
+  PUSH
+}
+
+enum NotificationStatus {
+  UNREAD
+
+  READ
+
+  ARCHIVED
+
+  PENDING
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id])
+
+  type NotificationType
+
+  channel NotificationChannel @default(IN_APP)
+
+  title String
+
+  message String
+
+  status NotificationStatus @default(UNREAD)
+
+  referenceId String?
+
+  createdAt DateTime @default(now())
+
+  readAt DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+////////////////////////////////////////////////////
+// INTERNAL MESSAGING
+////////////////////////////////////////////////////
+
+enum MessageStatus {
+  SENT
+
+  DELIVERED
+
+  READ
+}
+
+model Conversation {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+
+  conversationParticipants ConversationParticipant[]
+}
+
+model ConversationParticipant {
+  id String @id @default(uuid())
+
+  conversationId String
+
+  userId String
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id String @id @default(uuid())
+
+  conversationId String
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+
+  senderId String
+
+  sender User @relation("MessageSender", fields: [senderId], references: [id])
+
+  content String
+
+  status MessageStatus @default(SENT)
+
+  createdAt DateTime @default(now())
+}
+
+model NotificationPreference {
+  id String @id @default(uuid())
+
+  userId String @unique
+
+  user User @relation(fields: [userId], references: [id])
+
+  emailEnabled Boolean @default(true)
+
+  smsEnabled Boolean @default(true)
+
+  pushEnabled Boolean @default(true)
+
+  promotionsEnabled Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// LPG PRODUCT MANAGEMENT
+////////////////////////////////////////////////////
+
+enum LPGProductType {
+  GAS
+
+  CYLINDER
+
+  ACCESSORY
+}
+
+enum CylinderSize {
+  KG_3
+
+  KG_6
+
+  KG_9
+
+  KG_12_5
+
+  KG_15
+
+  KG_48
+}
+
+enum CylinderStatus {
+  AVAILABLE
+
+  ASSIGNED
+
+  WITH_CUSTOMER
+
+  IN_TRANSIT
+
+  EMPTY
+
+  DAMAGED
+
+  RETIRED
+}
+
+model LPGProduct {
+  id String @id @default(uuid())
+
+  productId String @unique
+
+  product Product @relation(fields: [productId], references: [id])
+
+  type LPGProductType
+
+  cylinderSize CylinderSize?
+
+  gasCapacity Float?
+
+  refillRequired Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model Cylinder {
+  id String @id @default(uuid())
+
+  serialNumber String @unique
+
+  productId String
+
+  product Product @relation(fields: [productId], references: [id])
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  status CylinderStatus @default(AVAILABLE)
+
+  currentCustomerId String?
+
+  currentCustomer Customer? @relation(fields: [currentCustomerId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  cylinderMovements CylinderMovement[]
+}
+
+model CylinderMovement {
+  id String @id @default(uuid())
+
+  cylinderId String
+
+  cylinder Cylinder @relation(fields: [cylinderId], references: [id])
+
+  fromStatus CylinderStatus?
+
+  toStatus CylinderStatus
+
+  customerId String?
+
+  customer Customer? @relation(fields: [customerId], references: [id])
+
+  reference String?
+
+  createdAt DateTime @default(now())
+
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+}
+
+////////////////////////////////////////////////////
+// INVENTORY & WAREHOUSE MANAGEMENT
+////////////////////////////////////////////////////
+
+enum WarehouseType {
+  MAIN
+
+  DEPOT
+
+  SHOP
+
+  MOBILE
+}
+
+model Warehouse {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  branchId String?
+
+  branch Branch? @relation(fields: [branchId], references: [id])
+
+  name String
+
+  type WarehouseType @default(MAIN)
+
+  address String
+
+  province String
+
+  district String
+
+  latitude Float?
+
+  longitude Float?
+
+  inventory Inventory[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+enum StockMovementType {
+  PURCHASE
+
+  SALE
+
+  TRANSFER
+
+  ADJUSTMENT
+
+  DAMAGE
+
+  RETURN
+}
+
+model StockMovement {
+  id String @id @default(uuid())
+
+  inventoryId String
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id])
+
+  type StockMovementType
+
+  quantity Float
+
+  previousQuantity Float
+
+  newQuantity Float
+
+  reference String?
+
+  performedById String?
+
+  performedBy User? @relation(fields: [performedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  product   Product? @relation(fields: [productId], references: [id])
+  productId String?
+}
+
+model SupplierPrice {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  productId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  product Product @relation(fields: [productId], references: [id])
+
+  price Float
+
+  effectiveFrom DateTime @default(now())
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  @@unique([organizationId, productId])
+}
+
+////////////////////////////////////////////////////
+// PAYMENTS
+////////////////////////////////////////////////////
+
+enum PaymentStatus {
+  PENDING
+
+  PROCESSING
+
+  SUCCESS
+
+  FAILED
+
+  REFUNDED
+}
+
+model Payment {
+  id String @id @default(uuid())
+
+  userId String
+
+  orderId String @unique
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+
+  amount Float
+
+  method PaymentMethod
+
+  status PaymentStatus @default(PENDING)
+
+  transactionReference String?
+
+  paidAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model DeliveryEvent {
+  id String @id @default(uuid())
+
+  deliveryId String
+
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  status DeliveryStatus
+
+  latitude Float?
+
+  longitude Float?
+
+  note String?
+
+  createdAt DateTime @default(now())
+}
+
+model LoyaltyTransaction {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  type LoyaltyTransactionType
+
+  points Int
+
+  balanceAfter Int
+
+  description String?
+
+  createdAt DateTime @default(now())
+}
+
+enum ReminderStatus {
+  PENDING
+
+  SENT
+
+  CANCELLED
+}
+
+model RefillReminder {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  predictionId String?
+
+  prediction ConsumptionPrediction? @relation(fields: [predictionId], references: [id])
+
+  scheduledFor DateTime
+
+  status ReminderStatus @default(PENDING)
+
+  sentAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model CustomerPreference {
+  id String @id @default(uuid())
+
+  customerId String @unique
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  preferredDeliveryTime String?
+
+  preferredPaymentMethod PaymentMethod?
+
+  marketingOptIn Boolean @default(true)
+
+  smsNotifications Boolean @default(true)
+
+  emailNotifications Boolean @default(true)
+
+  pushNotifications Boolean @default(true)
+
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// ANALYTICS ENGINE
+////////////////////////////////////////////////////
+
+enum AnalyticsPeriod {
+  DAILY
+
+  WEEKLY
+
+  MONTHLY
+
+  YEARLY
+}
+
+model AnalyticsSnapshot {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  period AnalyticsPeriod
+
+  periodStart DateTime
+
+  periodEnd DateTime
+
+  totalOrders Int @default(0)
+
+  completedOrders Int @default(0)
+
+  cancelledOrders Int @default(0)
+
+  totalRevenue Float @default(0)
+
+  averageOrderValue Float @default(0)
+
+  totalCustomers Int @default(0)
+
+  newCustomers Int @default(0)
+
+  returningCustomers Int @default(0)
+
+  createdAt DateTime @default(now())
+}
+
+model SupplierPerformance {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  totalOrders Int @default(0)
+
+  successfulDeliveries Int @default(0)
+
+  failedDeliveries Int @default(0)
+
+  averageDeliveryMinutes Float?
+
+  customerRating Float?
+
+  responseTimeMinutes Float?
+
+  availabilityScore Float?
+
+  performanceDate DateTime @default(now())
+}
+
+model ProductDemandAnalytics {
+  id String @id @default(uuid())
+
+  productId String
+
+  product Product @relation(fields: [productId], references: [id])
+
+  region String
+
+  quantitySold Float
+
+  demandScore Float
+
+  forecastQuantity Float?
+
+  recordedAt DateTime @default(now())
+}
+
+enum RevenueSource {
+  COMMISSION
+
+  SUBSCRIPTION
+
+  ADVERTISEMENT
+
+  PENALTY
+}
+
+model RevenueRecord {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  source RevenueSource
+
+  amount Float
+
+  reference String?
+
+  createdAt DateTime @default(now())
+}
+
+model CustomerSegment {
+  id String @id @default(uuid())
+
+  name String @unique
+
+  description String?
+
+  customers CustomerSegmentAssignment[]
+}
+
+model CustomerSegmentAssignment {
+  id String @id @default(uuid())
+
+  customerId String
+
+  segmentId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  segment CustomerSegment @relation(fields: [segmentId], references: [id])
+
+  assignedAt DateTime @default(now())
+
+  @@unique([customerId, segmentId])
+}
+
+model DeliveryAnalytics {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  totalDeliveries Int @default(0)
+
+  completedDeliveries Int @default(0)
+
+  failedDeliveries Int @default(0)
+
+  averageDeliveryTime Float?
+
+  averageDistance Float?
+
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// SECTION 12
+// MARKETPLACE SEARCH, LOCATION & SUPPLIER DISCOVERY
+////////////////////////////////////////////////////
+
+enum AvailabilityStatus {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+////////////////////////////////////////////////////
+// SUPPLIER MARKETPLACE PROFILE
+////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////
+// SUPPLIER LOCATIONS
+////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////
+// SERVICE COVERAGE AREAS
+////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////
+// CUSTOMER LOCATION SEARCH
+////////////////////////////////////////////////////
+
+model CustomerLocation {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  label String
+
+  address String
+
+  province String
+
+  district String
+
+  city String?
+
+  latitude Float
+
+  longitude Float
+
+  isDefault Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// SUPPLIER SEARCH INDEX / DISCOVERY CACHE
+////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////
+// CUSTOMER SEARCH HISTORY
+////////////////////////////////////////////////////
+
+model SearchHistory {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  searchTerm String
+
+  latitude Float?
+
+  longitude Float?
+
+  createdAt DateTime @default(now())
+}
+
+model Announcement {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  title String
+
+  content String
+
+  imageUrl String?
+
+  published Boolean @default(false)
+
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// SECTION 14
+// PAYMENTS & FINANCIAL LEDGER
+////////////////////////////////////////////////////
+
+enum PaymentProvider {
+  MOBILE_MONEY
+
+  BANK
+
+  CARD
+
+  CASH
+}
+
+enum TransactionStatus {
+  INITIATED
+
+  PENDING
+
+  SUCCESS
+
+  FAILED
+
+  CANCELLED
+
+  REFUNDED
+}
+
+enum LedgerEntryType {
+  CREDIT
+
+  DEBIT
+}
+
+enum SettlementStatus {
+  PENDING
+
+  PROCESSING
+
+  COMPLETED
+
+  FAILED
+}
+
+model PaymentTransaction {
+  id String @id @default(uuid())
+
+  orderId String
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  provider PaymentProvider
+
+  transactionReference String @unique
+
+  amount Float
+
+  status TransactionStatus @default(INITIATED)
+
+  metadata String?
+
+  paidAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  financialLedgers FinancialLedger[]
+  refunds          Refund[]
+}
+
+model FinancialLedger {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  transactionId String?
+
+  transaction PaymentTransaction? @relation(fields: [transactionId], references: [id])
+
+  entryType LedgerEntryType
+
+  amount Float
+
+  description String
+
+  createdAt DateTime @default(now())
+}
+
+model SupplierSettlement {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  totalSales Float
+
+  commissionAmount Float
+
+  payoutAmount Float
+
+  status SettlementStatus @default(PENDING)
+
+  periodStart DateTime
+
+  periodEnd DateTime
+
+  processedAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model CustomerWallet {
+  id String @id @default(uuid())
+
+  customerId String @unique
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  balance Float @default(0)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  walletTransactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id String @id @default(uuid())
+
+  walletId String
+
+  wallet CustomerWallet @relation(fields: [walletId], references: [id])
+
+  entryType LedgerEntryType
+
+  amount Float
+
+  description String
+
+  createdAt DateTime @default(now())
+}
+
+model Refund {
+  id String @id @default(uuid())
+
+  paymentId String
+
+  payment PaymentTransaction @relation(fields: [paymentId], references: [id])
+
+  amount Float
+
+  reason String
+
+  status TransactionStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// SECTION 15
+// TRUST, REVIEWS & RATINGS ENGINE
+////////////////////////////////////////////////////
+
+enum ReviewType {
+  SUPPLIER
+
+  PRODUCT
+
+  DELIVERY
+}
+
+enum ComplaintStatus {
+  OPEN
+
+  INVESTIGATING
+
+  RESOLVED
+
+  CLOSED
+}
+
+enum TrustEventType {
+  POSITIVE
+
+  NEGATIVE
+}
+
+model Review {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  productId String?
+
+  product Product? @relation(fields: [productId], references: [id])
+
+  orderId String?
+
+  order Order? @relation(fields: [orderId], references: [id])
+
+  type ReviewType
+
+  rating Int
+
+  comment String?
+
+  verifiedPurchase Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model SupplierReputation {
+  id String @id @default(uuid())
+
+  organizationId String @unique
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  averageRating Float @default(0)
+
+  totalReviews Int @default(0)
+
+  completedDeliveries Int @default(0)
+
+  cancelledDeliveries Int @default(0)
+
+  responseRate Float @default(0)
+
+  reliabilityScore Float @default(0)
+
+  trustScore Float @default(0)
+
+  updatedAt DateTime @updatedAt
+}
+
+model Complaint {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  orderId String?
+
+  order Order? @relation(fields: [orderId], references: [id])
+
+  title String
+
+  description String
+
+  status ComplaintStatus @default(OPEN)
+
+  resolution String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model TrustEvent {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  type TrustEventType
+
+  score Float
+
+  reason String
+
+  referenceId String?
+
+  createdAt DateTime @default(now())
+}
+
+model SupplierResponseMetric {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  averageResponseTime Float
+
+  totalMessages Int @default(0)
+
+  respondedMessages Int @default(0)
+
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// SECTION 16
+// PROMOTIONS, DISCOUNTS & LOYALTY ENGINE
+////////////////////////////////////////////////////
+
+enum PromotionType {
+  DISCOUNT_PERCENTAGE
+
+  DISCOUNT_FIXED
+
+  FREE_DELIVERY
+
+  BONUS_PRODUCT
+}
+
+enum PromotionStatus {
+  DRAFT
+
+  ACTIVE
+
+  EXPIRED
+
+  DISABLED
+}
+
+enum CouponType {
+  PUBLIC
+
+  PRIVATE
+
+  REFERRAL
+}
+
+enum LoyaltyTransactionType {
+  EARNED
+
+  REDEEMED
+
+  EXPIRED
+
+  ADJUSTMENT
+}
+
+model Promotion {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  title String
+
+  description String?
+
+  type PromotionType
+
+  value Float
+
+  minimumPurchase Float?
+
+  startDate DateTime
+
+  endDate DateTime
+
+  status PromotionStatus @default(DRAFT)
+
+  products PromotionProduct[]
+
+  coupons Coupon[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model PromotionProduct {
+  id String @id @default(uuid())
+
+  promotionId String
+
+  promotion Promotion @relation(fields: [promotionId], references: [id])
+
+  productId String
+
+  product Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([promotionId, productId])
+}
+
+model Coupon {
+  id String @id @default(uuid())
+
+  promotionId String
+
+  promotion Promotion @relation(fields: [promotionId], references: [id])
+
+  code String @unique
+
+  type CouponType
+
+  usageLimit Int?
+
+  usedCount Int @default(0)
+
+  expiryDate DateTime?
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  couponUsages CouponUsage[]
+}
+
+model CouponUsage {
+  id String @id @default(uuid())
+
+  couponId String
+
+  coupon Coupon @relation(fields: [couponId], references: [id])
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  orderId String
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  discountAmount Float
+
+  usedAt DateTime @default(now())
+}
+
+model LoyaltyAccount {
+  id String @id @default(uuid())
+
+  customerId String @unique
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  points Int @default(0)
+
+  lifetimePoints Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model Advertisement {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  title String
+
+  imageUrl String?
+
+  budget Float
+
+  startDate DateTime
+
+  endDate DateTime
+
+  active Boolean @default(true)
+
+  impressions Int @default(0)
+
+  clicks Int @default(0)
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// SECTION 17
+// ADMIN CONTROL CENTRE
+////////////////////////////////////////////////////
+
+enum ApprovalStatus {
+  PENDING
+
+  APPROVED
+
+  REJECTED
+}
+
+enum AdminActionType {
+  CREATE
+
+  UPDATE
+
+  DELETE
+
+  APPROVE
+
+  REJECT
+
+  SUSPEND
+}
+
+model SupplierApproval {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  submittedBy String
+
+  submittedUser User @relation("SupplierApprovalSubmitted", fields: [submittedBy], references: [id])
+
+  status ApprovalStatus @default(PENDING)
+
+  reviewedBy String?
+
+  reviewedUser User? @relation("SupplierApprovalReviewed", fields: [reviewedBy], references: [id])
+
+  notes String?
+
+  submittedAt DateTime @default(now())
+
+  reviewedAt DateTime?
+}
+
+model PlatformSetting {
+  id String @id @default(uuid())
+
+  key String @unique
+
+  value String
+
+  description String?
+
+  editable Boolean @default(true)
+
+  updatedAt DateTime @updatedAt
+}
+
+enum AlertSeverity {
+  LOW
+
+  MEDIUM
+
+  HIGH
+
+  CRITICAL
+}
+
+model SystemAlert {
+  id String @id @default(uuid())
+
+  title String
+
+  message String
+
+  severity AlertSeverity
+
+  resolved Boolean @default(false)
+
+  resolvedBy String?
+
+  createdAt DateTime @default(now())
+
+  resolvedAt DateTime?
+}
+
+model AdminActionLog {
+  id String @id @default(uuid())
+
+  adminId String
+
+  admin User @relation(fields: [adminId], references: [id])
+
+  action AdminActionType
+
+  targetType String
+
+  targetId String
+
+  description String?
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// SECTION 18 — AI ANALYTICS & DECISION ENGINE
+////////////////////////////////////////////////////
+
+enum PredictionType {
+  CUSTOMER_CONSUMPTION
+
+  DEMAND_FORECAST
+
+  INVENTORY_FORECAST
+
+  DELIVERY_RISK
+
+  SUPPLIER_PERFORMANCE
+
+  MARKET_TREND
+}
+
+enum AnalyticsPriority {
+  LOW
+
+  MEDIUM
+
+  HIGH
+
+  CRITICAL
+}
+
+enum InsightStatus {
+  OPEN
+
+  REVIEWED
+
+  RESOLVED
+
+  DISMISSED
+}
+
+////////////////////////////////////////////////////
+// AI PREDICTIONS
+////////////////////////////////////////////////////
+
+model AIPrediction {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  customerId String?
+
+  predictionType PredictionType
+
+  predictedValue Float?
+
+  confidenceScore Float
+
+  predictionDate DateTime @default(now())
+
+  expiresAt DateTime?
+
+  metadata Json?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  customer Customer? @relation(fields: [customerId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// AI GENERATED BUSINESS INSIGHTS
+////////////////////////////////////////////////////
+
+model AIInsight {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  title String
+
+  description String
+
+  priority AnalyticsPriority @default(MEDIUM)
+
+  status InsightStatus @default(OPEN)
+
+  category String
+
+  recommendedAction String?
+
+  impactScore Float?
+
+  generatedBy String @default("AI_ENGINE")
+
+  metadata Json?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// CUSTOMER BEHAVIOUR INTELLIGENCE
+////////////////////////////////////////////////////
+
+model CustomerBehaviourScore {
+  id String @id @default(uuid())
+
+  customerId String @unique
+
+  purchaseFrequency Float @default(0)
+
+  averageOrderValue Float @default(0)
+
+  churnRisk Float @default(0)
+
+  loyaltyScore Float @default(0)
+
+  engagementScore Float @default(0)
+
+  lastCalculated DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
+////////////////////////////////////////////////////
+// SUPPLIER PERFORMANCE INTELLIGENCE
+////////////////////////////////////////////////////
+
+model SupplierPerformanceScore {
+  id String @id @default(uuid())
+
+  organizationId String @unique
+
+  responseTimeScore Float @default(0)
+
+  deliveryScore Float @default(0)
+
+  customerRatingScore Float @default(0)
+
+  reliabilityScore Float @default(0)
+
+  overallScore Float @default(0)
+
+  lastCalculated DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+}
+
+////////////////////////////////////////////////////
+// DEMAND FORECASTING
+////////////////////////////////////////////////////
+
+model DemandForecast {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  productId String
+
+  forecastDate DateTime
+
+  predictedQuantity Float
+
+  confidenceScore Float
+
+  factors Json?
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  product Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// DELIVERY RISK ENGINE
+////////////////////////////////////////////////////
+
+model DeliveryRiskScore {
+  id String @id @default(uuid())
+
+  deliveryId String @unique
+
+  riskScore Float
+
+  priority AnalyticsPriority @default(MEDIUM)
+
+  reasons Json?
+
+  delivery Delivery @relation(fields: [deliveryId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// SYSTEM DECISION LOG
+////////////////////////////////////////////////////
+
+model DecisionLog {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  decisionType String
+
+  inputData Json
+
+  decisionResult Json
+
+  confidenceScore Float?
+
+  executed Boolean @default(false)
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+enum GeoType {
+  CUSTOMER
+
+  SUPPLIER
+
+  BRANCH
+
+  DELIVERY
+
+  VEHICLE
+}
+
+model ModelGeo {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  customerId String?
+
+  branchId String?
+
+  deliveryId String?
+
+  type GeoType
+
+  latitude Float
+
+  longitude Float
+
+  address String?
+
+  province String?
+
+  district String?
+
+  geohash String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  customer Customer? @relation(fields: [customerId], references: [id])
+
+  branch Branch? @relation(fields: [branchId], references: [id])
+
+  delivery Delivery? @relation(fields: [deliveryId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([customerId])
+  @@index([branchId])
+  @@index([deliveryId])
+  @@index([type])
+  @@index([province])
+  @@index([district])
+}
+
+////////////////////////////////////////////////////
+// SYSTEM SETTINGS
+////////////////////////////////////////////////////
+
+model SystemSetting {
+  id String @id @default(uuid())
+
+  key String @unique
+
+  value String
+
+  description String?
+
+  updatedAt DateTime @updatedAt
+}
+
+model SmsLog {
+  id String @id @default(uuid())
+
+  userId String?
+
+  user User? @relation(fields: [userId], references: [id])
+
+  phone String
+
+  message String
+
+  provider String?
+
+  status NotificationStatus @default(PENDING)
+
+  providerReference String?
+
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+  @@index([status])
+}
+
+model EmailLog {
+  id String @id @default(uuid())
+
+  userId String?
+
+  user User? @relation(fields: [userId], references: [id])
+
+  email String
+
+  subject String
+
+  body String
+
+  provider String?
+
+  status NotificationStatus @default(PENDING)
+
+  providerReference String?
+
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([status])
+}
+
+model PushNotification {
+  id String @id @default(uuid())
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id])
+
+  title String
+
+  message String
+
+  status NotificationStatus @default(PENDING)
+
+  sentAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OtpCode {
+  id String @id @default(uuid())
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id])
+
+  code String
+
+  purpose String
+
+  expiresAt DateTime
+
+  verified Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+  APPROVE
+  REJECT
+}
+
+enum IntegrationType {
+  PAYMENT
+  SMS
+  EMAIL
+  MAPS
+  ANALYTICS
+  AI
+  ERP
+}
+
+enum WebhookStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum BackupStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model OrganizationSetting {
+  id String @id @default(uuid())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  key String
+
+  value String
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, key])
+  @@index([organizationId])
+}
+
+model AuditLog {
+  id String @id @default(uuid())
+
+  userId String?
+
+  user User? @relation(fields: [userId], references: [id])
+
+  action AuditAction
+
+  entity String
+
+  entityId String?
+
+  description String?
+
+  ipAddress String?
+
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+}
+
+model ActivityLog {
+  id String @id @default(uuid())
+
+  userId String?
+
+  user User? @relation(fields: [userId], references: [id])
+
+  activity String
+
+  details String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model ApiKey {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  name String
+
+  apiKey String @unique
+
+  active Boolean @default(true)
+
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId])
+}
+
+model Webhook {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  url String
+
+  event String
+
+  secret String?
+
+  status WebhookStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId])
+}
+
+model Integration {
+  id String @id @default(uuid())
+
+  organizationId String?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  type IntegrationType
+
+  provider String
+
+  configuration Json?
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([type])
+}
+
+model Currency {
+  id String @id @default(uuid())
+
+  code String @unique
+
+  name String
+
+  symbol String
+
+  exchangeRate Float @default(1)
+
+  active Boolean @default(true)
+
+  updatedAt DateTime @updatedAt
+}
+
+model TaxRate {
+  id String @id @default(uuid())
+
+  name String
+
+  percentage Float
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+}
+
+model BackupLog {
+  id String @id @default(uuid())
+
+  fileName String
+
+  status BackupStatus
+
+  startedAt DateTime
+
+  completedAt DateTime?
+
+  fileSize Float?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+}
+
+////////////////////////////////////////////////////
+// CUSTOMER MARKETPLACE MODULE
+////////////////////////////////////////////////////
+
+enum MarketplaceStatus {
+  ACTIVE
+
+  INACTIVE
+
+  SUSPENDED
+}
+
+enum SupplierVisibility {
+  PUBLIC
+
+  PRIVATE
+
+  HIDDEN
+}
+
+model SupplierProfile {
+  id String @id @default(uuid())
+
+  organizationId String @unique
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  displayName String
+
+  description String?
+
+  logoUrl String?
+
+  bannerUrl String?
+
+  visibility SupplierVisibility @default(PUBLIC)
+
+  status MarketplaceStatus @default(ACTIVE)
+
+  averageRating Float @default(0)
+
+  totalReviews Int @default(0)
+
+  totalOrders Int @default(0)
+
+  verified Boolean @default(false)
+
+  marketplaceProducts SupplierMarketplaceProduct[]
+
+  reviews SupplierReview[]
+
+  favourites FavouriteSupplier[]
+
+  serviceAreas SupplierServiceArea[]
+
+  ranking SupplierRanking?
+
+  recommendations SupplierRecommendation[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model SupplierMarketplaceProduct {
+  id String @id @default(uuid())
+
+  supplierProfileId String
+
+  productId String
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id])
+
+  product Product @relation(fields: [productId], references: [id])
+
+  displayPrice Float
+
+  available Boolean @default(true)
+
+  description String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([supplierProfileId, productId])
+}
+
+model FavouriteSupplier {
+  id String @id @default(uuid())
+
+  customerId String
+
+  supplierProfileId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([customerId, supplierProfileId])
+}
+
+model SupplierReview {
+  id String @id @default(uuid())
+
+  customerId String
+
+  supplierProfileId String
+
+  orderId String?
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id])
+
+  order Order? @relation(fields: [orderId], references: [id])
+
+  rating Int
+
+  comment String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([customerId, orderId])
+}
+
+////////////////////////////////////////////////////
+// MARKETPLACE SEARCH
+////////////////////////////////////////////////////
+
+model MarketplaceSearch {
+  id String @id @default(uuid())
+
+  customerId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  keyword String?
+
+  province String?
+
+  district String?
+
+  latitude Float?
+
+  longitude Float?
+
+  radius Float?
+
+  createdAt DateTime @default(now())
+}
+
+model SupplierRecommendation {
+  id String @id @default(uuid())
+
+  customerId String
+
+  supplierProfileId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id])
+
+  reason String?
+
+  score Float
+
+  createdAt DateTime @default(now())
+}
+
+model CheckoutSession {
+  id String @id @default(uuid())
+
+  customerId String
+
+  cartId String
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  status CheckoutStatus @default(STARTED)
+
+  deliveryAddress String?
+
+  paymentMethod PaymentMethod?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+}
+
+enum CheckoutStatus {
+  STARTED
+
+  ADDRESS_SELECTED
+
+  PAYMENT_PENDING
+
+  COMPLETED
+
+  FAILED
+}
+
+model SupplierServiceArea {
+  id String @id @default(cuid())
+
+  supplierProfileId String
+
+  province String
+  district String
+
+  deliveryAvailable Boolean @default(true)
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id])
+
+  createdAt DateTime @default(now())
+  product   Product? @relation(fields: [productId], references: [id])
+  productId String?
+}
+
+model SupplierRanking {
+  id String @id @default(cuid())
+
+  supplierProfileId String @unique
+
+  ratingScore      Float @default(0)
+  priceScore       Float @default(0)
+  deliveryScore    Float @default(0)
+  reliabilityScore Float @default(0)
+
+  overallScore Float @default(0)
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id])
+
+  updatedAt DateTime @updatedAt
+}
