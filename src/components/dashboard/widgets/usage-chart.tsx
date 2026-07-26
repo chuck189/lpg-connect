@@ -1,91 +1,115 @@
-"use client"
+"use client";
 
 import {
-LineChart,
-Line,
-XAxis,
-YAxis,
-Tooltip,
-ResponsiveContainer
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 
-const data=[
-{
-month:"Jan",
-usage:20
-},
-{
-month:"Feb",
-usage:35
-},
-{
-month:"Mar",
-usage:28
-},
-{
-month:"Apr",
-usage:42
-},
-{
-month:"May",
-usage:30
-}
+const data = [
+  {
+    month: "Jan",
+    sales: 12000,
+  },
+  {
+    month: "Feb",
+    sales: 18000,
+  },
+  {
+    month: "Mar",
+    sales: 15000,
+  },
+  {
+    month: "Apr",
+    sales: 24000,
+  },
+  {
+    month: "May",
+    sales: 32000,
+  },
+  {
+    month: "Jun",
+    sales: 28000,
+  },
 ];
 
 
-export default function UsageChart(){
+export function UsageChart(){
 
 return (
 
-<div className="
+<div
+className="
 rounded-xl
 border
-bg-white
+bg-card
 p-6
-">
+"
+>
 
+<div className="mb-5">
 
-<h3 className="
-font-semibold
-mb-5
-">
-LPG Usage Trend
+<h3 className="font-semibold">
+
+LPG Sales Overview
+
 </h3>
 
 
-<div className="
-h-[300px]
-">
+<p className="text-sm text-muted-foreground">
+
+Monthly gas sales performance
+
+</p>
+
+</div>
+
+
+<div className="h-[320px]">
+
 
 <ResponsiveContainer
 width="100%"
 height="100%"
 >
 
-<LineChart data={data}>
+
+<AreaChart data={data}>
 
 
-<XAxis dataKey="month"/>
-
-
-<YAxis/>
-
-
-<Tooltip/>
-
-
-<Line
-type="monotone"
-dataKey="usage"
-strokeWidth={3}
+<CartesianGrid
+strokeDasharray="3 3"
 />
 
 
-</LineChart>
+<XAxis
+dataKey="month"
+/>
+
+
+<YAxis />
+
+
+<Tooltip />
+
+
+<Area
+type="monotone"
+dataKey="sales"
+strokeWidth={2}
+/>
+
+
+</AreaChart>
 
 
 </ResponsiveContainer>
+
 
 </div>
 

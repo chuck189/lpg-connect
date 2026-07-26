@@ -1,62 +1,111 @@
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-  } from "@/components/ui/card";
-  
+export function RecentOrders(){
+
   const orders = [
-    {
-      id: "ORD-1001",
-      supplier: "Afrox Zambia",
-      amount: "K420",
-      status: "Delivered",
-    },
-    {
-      id: "ORD-1002",
-      supplier: "ProGas",
-      amount: "K310",
-      status: "In Transit",
-    },
-    {
-      id: "ORD-1003",
-      supplier: "Oryx Energy",
-      amount: "K560",
-      status: "Pending",
-    },
+  
+  {
+  id:"#1001",
+  customer:"Muna Residence",
+  product:"12.5kg LPG",
+  status:"Delivered"
+  },
+  
+  {
+  id:"#1002",
+  customer:"Green Energy Ltd",
+  product:"48kg LPG",
+  status:"Pending"
+  },
+  
+  {
+  id:"#1003",
+  customer:"John Banda",
+  product:"5kg LPG",
+  status:"Processing"
+  }
+  
   ];
   
-  export default function RecentOrders() {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
-        </CardHeader>
   
-        <CardContent>
-          <div className="space-y-4">
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="flex items-center justify-between border-b pb-3 last:border-none"
-              >
-                <div>
-                  <p className="font-medium">{order.supplier}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {order.id}
-                  </p>
-                </div>
+  return (
   
-                <div className="text-right">
-                  <p className="font-semibold">{order.amount}</p>
-                  <p className="text-sm text-green-600">
-                    {order.status}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
+  <div
+  className="
+  rounded-xl
+  border
+  bg-card
+  p-6
+  "
+  >
+  
+  <h3 className="font-semibold mb-5">
+  Recent Orders
+  </h3>
+  
+  
+  <div className="space-y-4">
+  
+  
+  {orders.map(order=>(
+  
+  
+  <div
+  key={order.id}
+  className="
+  flex
+  items-center
+  justify-between
+  border-b
+  pb-3
+  "
+  >
+  
+  
+  <div>
+  
+  <p className="font-medium">
+  
+  {order.customer}
+  
+  </p>
+  
+  
+  <p className="text-sm text-muted-foreground">
+  
+  {order.product}
+  
+  </p>
+  
+  
+  </div>
+  
+  
+  <span
+  className="
+  rounded-full
+  bg-muted
+  px-3
+  py-1
+  text-xs
+  "
+  >
+  
+  {order.status}
+  
+  </span>
+  
+  
+  </div>
+  
+  
+  ))}
+  
+  
+  </div>
+  
+  
+  </div>
+  
+  
+  )
+  
   }
