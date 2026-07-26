@@ -90,59 +90,22 @@ export default function DashboardSidebar(){
 
 return (
 
-<aside
-className="
-hidden
-md:flex
-w-72
-border-r
-bg-white
-dark:bg-slate-950
-min-h-screen
-flex-col
-"
->
+<aside className="hidden md:flex w-72 border-r bg-white dark:bg-slate-950 min-h-screen flex-col">
 
 
-<div
-className="
-p-6
-border-b
-"
->
+<div className="p-6 border-b">
 
-<h1
-className="
-text-2xl
-font-bold
-text-green-600
-"
->
-LPG Connect
-</h1>
+<h1 className="text-2xl font-bold text-green-600">LPG Connect</h1>
 
 
-<p
-className="
-text-xs
-text-muted-foreground
-mt-1
-"
->
-Energy Management Platform
-</p>
+<p className="text-xs text-muted-foreground mt-1">Energy Management Platform</p>
 
 
 </div>
 
 
 
-<nav
-className="
-p-4
-space-y-1
-"
->
+<nav className="p-4 space-y-1">
 
 
 {
@@ -154,26 +117,11 @@ const Icon=item.icon;
 
 return (
 
-<Link
-key={item.name}
-href={item.href}
-className="
-flex
-items-center
-gap-3
-rounded-lg
-px-4
-py-3
-text-sm
-transition
-hover:bg-green-50
-hover:text-green-700
-"
->
+<Link key={item.name} href={item.href} className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition hover:bg-green-50 hover:text-green-700">
 
-<Icon size={19}/>
+  <Icon size={19} />
 
-{item.name}
+  {item.name}
 
 </Link>
 

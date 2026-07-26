@@ -1,28 +1,19 @@
-// export { default } from "next-auth/middleware";
+import { withAuth } from "next-auth/middleware";
 
-
-// export const config = {
-
-// matcher:[
-
-// "/customer/:path*",
-
-// "/supplier/:path*",
-
-// "/driver/:path*",
-
-// "/admin/:path*"
-
-// ]
-
-// };
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-
-export function middleware(request: NextRequest) {
-  return NextResponse.next();
-}
+export default withAuth(
+  () => {},
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
+  }
+);
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/dashboard/:path*",
+    "/supplier/:path*",
+    "/admin/:path*",
+    "/driver/:path*",
+  ],
 };

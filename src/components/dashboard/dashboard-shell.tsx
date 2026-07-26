@@ -10,35 +10,17 @@ export default function DashboardShell({
   children,
 }: DashboardShellProps) {
   return (
-    <div
-      className="
-        min-h-screen
-        flex
-        bg-muted/40
-      "
-    >
+    <div className="min-h-screen flex bg-muted/40">
 
       <DashboardSidebar />
 
 
-      <div
-        className="
-          flex-1
-          flex
-          flex-col
-          w-full
-        "
-      >
+      <div className="flex-1 flex flex-col w-full">
 
         <DashboardHeader />
 
 
-        <main
-          className="
-            p-6
-            space-y-6
-          "
-        >
+        <main className="p-6 space-y-6">
 
           {children}
 
