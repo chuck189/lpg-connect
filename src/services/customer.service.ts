@@ -1,8 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
 
-export async function getCustomerLPG Connect
-Operations Center(
+export async function getCustomerDashboard(
 customerId:string
 ){
 

@@ -9,8 +9,7 @@ interface Props {
     }
     
     
-    export default function LPG Connect
-Operations CenterCard({
+    export default function DashboardCard({
     title,
     value,
     description

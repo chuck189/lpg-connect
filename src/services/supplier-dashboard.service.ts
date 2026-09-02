@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export async function getSupplierLPG Connect
-Operations Center(organizationId: string) {
+export async function getSupplierDashboard(organizationId: string) {
   // Temporary implementation until authentication is connected
 
   const [

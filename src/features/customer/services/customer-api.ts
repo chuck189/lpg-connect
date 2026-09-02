@@ -1,11 +1,9 @@
-export async function getCustomerLPG Connect
-Operations Center(){
+export async function getCustomerDashboard(){
 
 
     const response =
     await fetch(
-    "/api/customers/LPG Connect
-Operations Center"
+    "/api/customers/Dashboard"
     );
     
     
@@ -13,8 +11,7 @@ Operations Center"
     if(!response.ok){
     
     throw new Error(
-    "Failed loading LPG Connect
-Operations Center"
+    "Failed loading Dashboard"
     );
     
     }

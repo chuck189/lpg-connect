@@ -64,8 +64,7 @@ export async function GET() {
     return NextResponse.json(
       {
         success:false,
-        error:"Failed loading LPG Connect
-Operations Center"
+        error:"Failed loading Dashboard"
       },
       {
         status:500
