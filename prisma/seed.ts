@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, AccountStatus, ProductCategory } from "../src/generated/prisma";
+import { PrismaClient, UserRole, AccountStatus, ProductCategory, PermissionAction } from "../src/generated/prisma";
 import bcrypt from "bcrypt";
 
 
@@ -134,66 +134,42 @@ async function main() {
   });
 
   const permissions = [
-
-    "supplier.manage",
-    
-    "supplier.verify",
-    
-    "customer.manage",
-    
-    "order.create",
-    
-    "order.manage",
-    
-    "delivery.assign",
-    
-    "inventory.manage",
-    
-    "payment.view",
-    
-    "analytics.view",
-    
-    "user.manage"
-    
-    ];
+    { name: "supplier.manage", module: "supplier", action: PermissionAction.UPDATE },
+    { name: "supplier.verify", module: "supplier", action: PermissionAction.APPROVE },
+    { name: "customer.manage", module: "customer", action: PermissionAction.UPDATE },
+    { name: "order.create", module: "order", action: PermissionAction.CREATE },
+    { name: "order.manage", module: "order", action: PermissionAction.UPDATE },
+    { name: "delivery.assign", module: "delivery", action: PermissionAction.UPDATE },
+    { name: "inventory.manage", module: "inventory", action: PermissionAction.UPDATE },
+    { name: "payment.view", module: "payment", action: PermissionAction.READ },
+    { name: "analytics.view", module: "analytics", action: PermissionAction.READ },
+    { name: "user.manage", module: "user", action: PermissionAction.UPDATE }
+  ];
     
     
-    for(const permission of permissions){
-    
+  for(const p of permissions){
     await prisma.permission.upsert({
-    
-    where:{
-    name:permission
-    },
-    
-    update:{},
-    
-    create:{
-    name:permission
-    }
-    
+      where: {
+        name: p.name
+      },
+      update: {},
+      create: {
+        name: p.name,
+        module: p.module,
+        action: p.action
+      }
     });
-    
-    }
+  }
 
   console.log("Seed completed successfully");
 
 }
 
-
-
 main()
-
 .catch((error)=>{
-
 console.error(error);
-
 process.exit(1);
-
 })
-
 .finally(async()=>{
-
 await prisma.$disconnect();
-
 });

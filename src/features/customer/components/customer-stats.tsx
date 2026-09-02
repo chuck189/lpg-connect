@@ -1,9 +1,7 @@
 "use client";
 
 
-import { useCustomerLPG Connect
-Operations Center } from "../hooks/use-customer-LPG Connect
-Operations Center";
+import { useCustomerDashboard } from "../hooks/use-customer-dashboard";
 
 
 export default function CustomerStats(){
@@ -13,8 +11,7 @@ const {
 data,
 isLoading
 
-}=useCustomerLPG Connect
-Operations Center();
+}=useCustomerDashboard();
 
 
 
@@ -28,8 +25,7 @@ Loading...
 
 
 
-const LPG Connect
-Operations Center=data.data;
+const Dashboard=data.data;
 
 
 
@@ -46,8 +42,7 @@ Orders
 
 <p className="text-3xl font-bold">
 
-{LPG Connect
-Operations Center.orders}
+{Dashboard.orders}
 
 </p>
 
@@ -63,8 +58,7 @@ Total LPG Used
 
 <p className="text-3xl font-bold">
 
-{LPG Connect
-Operations Center.usage}
+{Dashboard.usage}
 
 </p>
 
@@ -80,8 +74,7 @@ Loyalty Score
 
 <p className="text-3xl font-bold">
 
-{LPG Connect
-Operations Center.loyalty}
+{Dashboard.loyalty}
 
 </p>
 
