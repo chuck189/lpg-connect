@@ -1,27 +1,57 @@
 import { NextResponse } from "next/server";
-import { registerUser } from "@/services/auth-service";
+import { registerSupplier } from "@/features/suppliers/services/register-supplier";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcrypt";
+import { UserRole } from "@/generated/prisma";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const user = await registerUser(body);
+    const { role, ...data } = body;
 
-    return NextResponse.json({
-      message: "Account created successfully",
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
+    if (role === "SUPPLIER") {
+      const supplier = await registerSupplier(data as any);
+      return NextResponse.json({ success: true, data: supplier });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email }
     });
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        error: error.message,
+
+    if (existingUser) {
+      return NextResponse.json({ success: false, error: "Email already registered" }, { status: 400 });
+    }
+
+    const passwordHash = await bcrypt.hash(data.password, 12);
+
+    const userRole = Object.values(UserRole).includes(role as UserRole)
+      ? (role as UserRole)
+      : UserRole.CUSTOMER;
+
+    const user = await prisma.user.create({
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        password: passwordHash,
+        role: userRole,
+        ...(userRole === UserRole.CUSTOMER && {
+          customer: {
+            create: {}
+          }
+        })
       },
-      {
-        status: 400,
+      include: {
+        customer: true
       }
-    );
+    });
+
+    // Don't return password hash
+    const { password: _, ...userWithoutPassword } = user;
+
+    return NextResponse.json({ success: true, data: userWithoutPassword });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
